@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f2eee5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="SolaFit">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>SolaFit</title>
+</head>
+<body>
+
+  <!-- Contenido de las pestañas -->
+  <main id="app">
+    <!-- INICIO -->
+    <section class="page" data-page="inicio">
+      <header class="page-header">
+        <p class="saludo" id="saludo-texto">Buenos días</p>
+        <div class="brand-row">
+          <h1 class="brand">SolaFit<span class="leaf">✦</span></h1>
+          <div class="perfil-circle" id="avatar-inicial">·</div>
+        </div>
+        <p class="subtitle" id="subtitle-inicio">Tu plan, hecho a tu medida</p>
+      </header>
+
+      <!-- Estado vacío: sin perfil aún -->
+      <div class="empty-state" id="inicio-empty">
+        <div class="empty-icon">✦</div>
+        <h2>Bienvenido a SolaFit</h2>
+        <p>Empieza configurando tu perfil en la pestaña <b>Yo</b>. La app calculará tus macros y generará tus planes.</p>
+        <button class="btn-primary" onclick="cambiarPestana('yo')">Configurar mi perfil</button>
+      </div>
+
+      <!-- Dashboard del día (cuando hay perfil) -->
+      <div id="inicio-dashboard" class="hidden">
+        <!-- Tarjeta macros del día -->
+        <div class="card-raised" style="margin-bottom: 14px;">
+          <p class="kcal-label">Tus macros de hoy</p>
+          <div class="kcal-num" id="inicio-kcal">— <small>kcal</small></div>
+          <p class="kcal-resta" id="inicio-macros-detalle" style="color: var(--ink-2);">—</p>
+        </div>
+
+        <!-- Tarjeta comida de hoy -->
+        <h2 class="seccion-titulo"><span class="accent-dot"></span>Comida de hoy</h2>
+        <div id="inicio-comida-hoy"></div>
+
+        <!-- Tarjeta entreno de hoy -->
+        <h2 class="seccion-titulo"><span class="accent-dot"></span>Entreno de hoy</h2>
+        <div id="inicio-entreno-hoy"></div>
+
+        <!-- Próximos días -->
+        <h2 class="seccion-titulo"><span class="accent-dot"></span>Mañana</h2>
+        <div id="inicio-manana"></div>
+      </div>
+    </section>
+
+    <!-- COMIDAS -->
+    <section class="page hidden" data-page="comidas">
+      <header class="page-header">
+        <h1 class="page-title">Comidas</h1>
+        <p class="page-subtitle">Tu plan semanal personalizado</p>
+      </header>
+
+      <!-- Estado vacío (sin perfil aún) -->
+      <div class="empty-state" id="comidas-empty">
+        <div class="empty-icon">🍳</div>
+        <h2>Sin plan todavía</h2>
+        <p>Necesitas configurar tu perfil primero para que podamos generar tu plan de comidas.</p>
+        <button class="btn-primary" onclick="cambiarPestana('yo')">Ir a mi perfil</button>
+      </div>
+
+      <!-- Contenido cuando hay macros -->
+      <div id="comidas-contenido" class="hidden">
+        <!-- Tarjeta resumen de macros (no editable, viene del paso Yo) -->
+        <div class="card-raised macros-card" style="margin-bottom: 16px;">
+          <div class="kcal-row">
+            <div class="dial">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(190,180,158,0.2)" stroke-width="6"/>
+                <circle cx="50" cy="50" r="44" fill="none" stroke="url(#gradComida)" stroke-width="6" stroke-linecap="round" stroke-dasharray="276" stroke-dashoffset="0"/>
+                <defs>
+                  <linearGradient id="gradComida" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#e8633d"/>
+                    <stop offset="100%" stop-color="#f47a52"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="dial-content">
+                <div class="pct">✓</div>
+                <div class="lbl">listo</div>
+              </div>
+            </div>
+            <div class="kcal-info">
+              <p class="kcal-label">Tus macros</p>
+              <div class="kcal-num" id="comidas-kcal">— <small>kcal</small></div>
+              <p class="kcal-resta" id="comidas-macros-detalle">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configuración: nº comidas -->
+        <div class="card-raised" style="margin-bottom: 16px;">
+          <div class="input-group" style="margin-bottom: 0;">
+            <p class="input-label">Comidas al día</p>
+            <select class="select" id="campo-num-comidas">
+              <option value="3">3 comidas (desayuno, comida, cena)</option>
+              <option value="4" selected>4 comidas (+ merienda)</option>
+              <option value="5">5 comidas (+ media mañana y merienda)</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="btn-generar-comidas" style="margin-bottom: 16px;">
+          Generar mi semana ✦
+        </button>
+
+        <!-- Aviso si no hay recetas compatibles -->
+        <div id="comidas-aviso" class="nota-objetivo hidden" style="margin-bottom: 16px;"></div>
+
+        <!-- Plan generado -->
+        <div id="plan-comidas-output"></div>
+
+        <!-- Lista de la compra -->
+        <div id="lista-compra-output"></div>
+      </div>
+    </section>
+
+    <!-- ENTRENO -->
+    <section class="page hidden" data-page="entreno">
+      <header class="page-header">
+        <h1 class="page-title">Entreno</h1>
+        <p class="page-subtitle">4 semanas con progresión</p>
+      </header>
+
+      <div class="empty-state" id="entreno-empty">
+        <div class="empty-icon">🏋️</div>
+        <h2>Sin plan todavía</h2>
+        <p>Necesitas configurar tu perfil primero para que podamos generar tu plan de entreno.</p>
+        <button class="btn-primary" onclick="cambiarPestana('yo')">Ir a mi perfil</button>
+      </div>
+
+      <div id="entreno-contenido" class="hidden">
+        <!-- Resumen del plan -->
+        <div class="card-raised" style="margin-bottom: 16px;">
+          <p class="kcal-label">Tu plan</p>
+          <p style="font-family: 'DM Serif Display', serif; font-size: 22px; margin: 4px 0 6px 0; line-height: 1.1;" id="entreno-rutina-tipo">—</p>
+          <p style="font-size: 13px; color: var(--ink-2); margin: 0;" id="entreno-resumen-dias">—</p>
+          <p id="entreno-vdot-info" style="font-size: 12px; color: var(--coral); margin: 8px 0 0 0; font-weight: 500;"></p>
+        </div>
+
+        <button class="btn-primary" id="btn-generar-entreno" style="margin-bottom: 16px;">
+          Generar plan de 4 semanas
+        </button>
+
+        <!-- Tabs de semanas -->
+        <div class="entreno-tabs hidden" id="entreno-tabs"></div>
+
+        <!-- Días del entreno -->
+        <div id="entreno-dias-output"></div>
+
+        <!-- Leyenda de ritmos -->
+        <div id="entreno-leyenda"></div>
+      </div>
+    </section>
+
+    <!-- YO -->
+    <section class="page hidden" data-page="yo">
+      <header class="page-header">
+        <h1 class="page-title">Tu perfil</h1>
+        <p class="page-subtitle">Configura tus datos para generar tus planes</p>
+      </header>
+
+      <!-- BLOQUE 1: DATOS PERSONALES -->
+      <h2 class="seccion-titulo"><span class="accent-dot"></span>Datos personales</h2>
+      <div class="card-raised" style="margin-bottom: 14px;">
+        <div class="input-group">
+          <p class="input-label">Nombre</p>
+          <input type="text" class="input" id="campo-nombre" placeholder="Tu nombre">
+        </div>
+        <div class="grid-2">
+          <div class="input-group">
+            <p class="input-label">Edad</p>
+            <input type="number" class="input" id="campo-edad" placeholder="30" min="15" max="90">
+          </div>
+          <div class="input-group">
+            <p class="input-label">Sexo</p>
+            <select class="select" id="campo-sexo">
+              <option value="h">Hombre</option>
+              <option value="m">Mujer</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <p class="input-label">Peso (kg)</p>
+            <input type="number" class="input" id="campo-peso" placeholder="75" min="30" max="250" step="0.1">
+          </div>
+          <div class="input-group">
+            <p class="input-label">Altura (cm)</p>
+            <input type="number" class="input" id="campo-altura" placeholder="175" min="120" max="220">
+          </div>
+        </div>
+        <div class="input-group" style="margin-bottom: 0;">
+          <p class="input-label">Trabajo / vida diaria</p>
+          <select class="select" id="campo-basal">
+            <option value="1.2">Sedentario (oficina, poco moverse)</option>
+            <option value="1.3" selected>Ligero (camino algo durante el día)</option>
+            <option value="1.4">Activo (de pie, en movimiento)</option>
+            <option value="1.5">Muy activo (trabajo físico)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- BLOQUE 2: OBJETIVO -->
+      <h2 class="seccion-titulo"><span class="accent-dot"></span>Tu objetivo</h2>
+      <div class="card-raised" style="margin-bottom: 14px;">
+        <div class="input-group">
+          <p class="input-label">¿Qué quieres conseguir?</p>
+          <select class="select" id="campo-objetivo">
+            <option value="recomp">Recomposición corporal</option>
+            <option value="musculo">Ganar músculo</option>
+            <option value="running">Mejorar rendimiento running</option>
+            <option value="mantener">Mantenerme</option>
+          </select>
+        </div>
+        <div class="input-group" style="margin-bottom: 0;">
+          <p class="input-label">Agresividad del plan</p>
+          <select class="select" id="campo-agresividad">
+            <option value="suave">Suave (cambios graduales)</option>
+            <option value="moderado" selected>Moderado (recomendado)</option>
+            <option value="agresivo">Agresivo (resultados rápidos)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- BLOQUE 3: DÍAS DE ENTRENO -->
+      <h2 class="seccion-titulo"><span class="accent-dot"></span>Días de entreno</h2>
+      <div class="card-raised" style="margin-bottom: 14px;">
+        <p class="input-label" style="margin-bottom: 10px;">Toca cada día para alternar</p>
+        <div class="dias-grid" id="dias-grid"></div>
+        <p style="margin: 10px 0 0 0; font-size: 11px; color: var(--ink-3); text-align: center;">
+          Descanso → Fuerza → Running → Ambos
+        </p>
+      </div>
+
+      <!-- BLOQUE 4: COMIDA -->
+      <h2 class="seccion-titulo"><span class="accent-dot"></span>Comida</h2>
+      <div class="card-raised" style="margin-bottom: 14px;">
+        <div class="input-group">
+          <p class="input-label">Tipo de dieta</p>
+          <select class="select" id="campo-dieta">
+            <option value="omn">Omnívoro</option>
+            <option value="pesc">Pescetariano</option>
+            <option value="veg">Vegetariano</option>
+            <option value="vegan">Vegano</option>
+          </select>
+        </div>
+
+        <p class="input-label">Alergias / intolerancias</p>
+        <div class="chip-grid" id="alergias-grid" style="margin-bottom: 16px;"></div>
+
+        <p class="input-label">No me gusta / no quiero</p>
+        <div class="chip-grid" id="excluir-grid" style="margin-bottom: 16px;"></div>
+
+        <div class="input-group" style="margin-bottom: 0;">
+          <p class="input-label">Otros (separa con comas)</p>
+          <input type="text" class="input" id="campo-otros" placeholder="ej. cilantro, pepino">
+        </div>
+      </div>
+
+      <!-- BLOQUE 5: FUERZA -->
+      <h2 class="seccion-titulo"><span class="accent-dot"></span>Fuerza</h2>
+      <div class="card-raised" style="margin-bottom: 14px;">
+        <div class="input-group">
+          <p class="input-label">Nivel</p>
+          <select class="select" id="campo-nivel-fuerza">
+            <option value="prin">Principiante (&lt;1 año)</option>
+            <option value="int" selected>Intermedio (1-3 años)</option>
+            <option value="avz">Avanzado (3+ años)</option>
+          </select>
+        </div>
+
+        <p class="input-label" style="margin-top: 16px;">Lo que haces ahora</p>
+        <div id="basicos-grid"></div>
+
+        <p class="input-label" style="margin-top: 16px;">A lo que quieres llegar</p>
+        <div id="lista-metas" style="margin-bottom: 8px;"></div>
+        <button class="btn-secondary" id="btn-add-meta" style="height: 40px; font-size: 13px;">+ Añadir objetivo</button>
+      </div>
+
+      <!-- BLOQUE 6: RUNNING -->
+      <h2 class="seccion-titulo"><span class="accent-dot"></span>Running</h2>
+      <div class="card-raised" style="margin-bottom: 24px;">
+        <p class="input-label">Tu mejor marca reciente</p>
+        <div class="grid-2">
+          <div class="input-group">
+            <p class="input-label">Distancia</p>
+            <select class="select" id="campo-marca-dist">
+              <option value="">—</option>
+              <option value="5">5K</option>
+              <option value="10">10K</option>
+              <option value="21">Media maratón</option>
+              <option value="42">Maratón</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <p class="input-label">Tiempo</p>
+            <input type="text" class="input" id="campo-marca-tiempo" placeholder="52:30">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="input-group">
+            <p class="input-label">Km/semana</p>
+            <input type="number" class="input" id="campo-kmsem" placeholder="25" min="0" max="200">
+          </div>
+          <div class="input-group">
+            <p class="input-label">Ritmo cómodo</p>
+            <input type="text" class="input" id="campo-ritmo" placeholder="5:30/km">
+          </div>
+        </div>
+
+        <p class="input-label" style="margin-top: 4px;">Tu meta</p>
+        <div class="grid-2">
+          <div class="input-group">
+            <p class="input-label">Distancia</p>
+            <select class="select" id="campo-dist-obj">
+              <option value="">—</option>
+              <option value="5">5K</option>
+              <option value="10">10K</option>
+              <option value="21">Media maratón</option>
+              <option value="42">Maratón</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <p class="input-label">Tiempo objetivo</p>
+            <input type="text" class="input" id="campo-tiempo-obj" placeholder="50:00">
+          </div>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 0;">
+          <p class="input-label">Fecha objetivo (opcional)</p>
+          <input type="date" class="input" id="campo-fecha-obj">
+        </div>
+      </div>
+
+      <!-- RESULTADO MACROS -->
+      <div id="macros-resultado" class="hidden" style="margin-bottom: 24px;">
+        <h2 class="seccion-titulo"><span class="accent-dot"></span>Tus macros calculados</h2>
+        <div class="card-raised macros-card">
+          <div class="kcal-row">
+            <div class="dial">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(190,180,158,0.2)" stroke-width="6"/>
+                <circle id="dial-circle" cx="50" cy="50" r="44" fill="none" stroke="url(#gradCoral)" stroke-width="6" stroke-linecap="round" stroke-dasharray="276" stroke-dashoffset="69" style="transition: stroke-dashoffset 0.8s ease-out"/>
+                <defs>
+                  <linearGradient id="gradCoral" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#e8633d"/>
+                    <stop offset="100%" stop-color="#f47a52"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="dial-content">
+                <div class="pct" id="dial-label">Listo</div>
+                <div class="lbl">objetivo</div>
+              </div>
+            </div>
+            <div class="kcal-info">
+              <p class="kcal-label">Calorías diarias</p>
+              <div class="kcal-num" id="resultado-kcal">— <small>kcal</small></div>
+              <p class="kcal-resta" id="resultado-detalle">—</p>
+            </div>
+          </div>
+
+          <div class="macros-grid-result">
+            <div class="macro-pill-result">
+              <div class="v" id="resultado-prot">—</div>
+              <div class="l">proteína</div>
+            </div>
+            <div class="macro-pill-result">
+              <div class="v" id="resultado-hc">—</div>
+              <div class="l">hidratos</div>
+            </div>
+            <div class="macro-pill-result">
+              <div class="v" id="resultado-gr">—</div>
+              <div class="l">grasas</div>
+            </div>
+          </div>
+
+          <div class="nota-objetivo" id="resultado-nota"></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btn-guardar">Guardar y calcular mis macros</button>
+
+      <button class="btn-secondary" id="btn-reset" style="margin-top: 12px; color: var(--ink-3); font-size: 13px;">
+        Borrar todos mis datos
+      </button>
+    </section>
+  </main>
+
+  <!-- Navegación inferior -->
+  <nav class="tabbar">
+    <button class="tab active" data-tab="inicio">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span class="tab-label">Inicio</span>
+    </button>
+    <button class="tab" data-tab="comidas">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 21h10a2 2 0 0 0 2-2v-8H5v8a2 2 0 0 0 2 2z"/>
+        <path d="M21 5h-2.5l-1-2h-11l-1 2H3v4h18z"/>
+      </svg>
+      <span class="tab-label">Comidas</span>
+    </button>
+    <button class="tab" data-tab="entreno">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6.5 6.5h11M6.5 17.5h11M3 9.5v5M21 9.5v5M5.5 7.5v9M18.5 7.5v9"/>
+      </svg>
+      <span class="tab-label">Entreno</span>
+    </button>
+    <button class="tab" data-tab="yo">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span class="tab-label">Yo</span>
+    </button>
+  </nav>
+
+  <!-- Modal mover día -->
+  <div class="modal-overlay" id="modal-mover-dia">
+    <div class="modal">
+      <h3>Mover sesión</h3>
+      <p id="modal-info-texto">—</p>
+      <div class="modal-dias-grid" id="modal-dias-grid"></div>
+      <button class="btn-secondary" id="modal-cancelar">Cancelar</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
